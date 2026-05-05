@@ -1,83 +1,68 @@
+HTML
 <!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>The Phrasal-Filmer AR</title>
-    <!-- Versiyonu 1.3.0 yaparak daha stabil bir yapı kuruyoruz -->
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
-    
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
         #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 1000;
+            background: rgba(0,0,0,0.8); z-index: 1000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: white; font-family: sans-serif; text-align: center;
+            color: white; font-family: sans-serif;
         }
-        #btn {
-            padding: 20px 40px; font-size: 22px; background: #27ae60;
-            color: white; border: none; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
+        #btn { padding: 15px 35px; font-size: 20px; background: #27ae60; color: white; border: none; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <h2>Phrasal-Filmer: LFT</h2>
-        <p>Kamerayı kullanmak için butona basın.</p>
-        <button id="btn">BAŞLAT</button>
+        <h2>"Look Forward To" AR</h2>
+        <button id="btn">DENEYİMİ BAŞLAT</button>
     </div>
 
     <a-scene 
-        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes;" 
-        color-space="sRGB" 
+        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001;" 
+        embedded color-space="sRGB" 
         renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false">
+        vr-mode-ui="enabled: false">
         
         <a-assets>
-            <!-- lft.mp4 dosyanın burada doğru olduğundan eminiz -->
-            <video id="arVideo" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
+            <video id="lftVid" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- Hedef Bulunduğunda Görünecek Katman -->
-        <a-entity id="targetAnchor" mindar-image-target="targetIndex: 0">
-            <!-- a-plane kullanımı a-video'dan daha kararlıdır -->
-            <a-plane id="videoPlane" material="src: #arVideo; shader: flat;" 
-                     width="1" height="0.56" position="0 0 0" rotation="0 0 0"></a-plane>
+        <a-entity id="target" mindar-image-target="targetIndex: 0">
+            <!-- OBJEYİ BİRAZ ÖNE ALARAK (0.1) KARTIN İÇİNDE KAYBOLMASINI ENGELLİYORUZ -->
+            <a-video src="#lftVid" width="1.2" height="0.67" position="0 0 0.1" material="shader: flat; side: double;"></a-video>
         </a-entity>
     </a-scene>
 
     <script>
-        const startBtn = document.getElementById('btn');
-        const overlay = document.getElementById('overlay');
-        const video = document.getElementById('arVideo');
-        const sceneEl = document.querySelector('a-scene');
+        const btn = document.getElementById('btn');
+        const video = document.getElementById('lftVid');
+        const scene = document.querySelector('a-scene');
 
-        startBtn.addEventListener('click', () => {
-            // Android Ses ve Görüntü Kilidini Elle Açma
+        btn.addEventListener('click', () => {
+            // Android ses ve görüntü kilidini açan zorunlu dokunuş
             video.play().then(() => {
                 video.pause();
                 video.currentTime = 0;
             });
-
-            sceneEl.systems["mindar-image-system"].start();
-            overlay.style.display = 'none';
+            scene.systems["mindar-image-system"].start();
+            document.getElementById('overlay').style.display = 'none';
         });
 
-        const targetEl = document.querySelector('#targetAnchor');
-        
-        targetEl.addEventListener("targetFound", () => {
-            console.log("Hedef Tespit Edildi");
-            video.play();
+        const target = document.querySelector('#target');
+        target.addEventListener("targetFound", () => { 
+            console.log("Hedef Algılandı!"); 
+            video.play(); 
         });
-
-        targetEl.addEventListener("targetLost", () => {
-            video.pause();
+        target.addEventListener("targetLost", () => { 
+            video.pause(); 
         });
     </script>
 </body>
