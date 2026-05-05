@@ -23,23 +23,24 @@ HTML
         <button id="btn">DENEYİMİ BAŞLAT</button>
     </div>
 
-    <a-scene 
-        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001;" 
-        embedded color-space="sRGB" 
-        renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false">
-        
-        <a-assets>
-            <video id="lftVid" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
-        </a-assets>
+   <!-- Sahne içindeki ilgili satırları bunlarla değiştirmen yeterli -->
+<a-scene 
+    mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.1;" 
+    embedded color-space="sRGB" 
+    renderer="colorManagement: true, physicallyCorrectLights" 
+    vr-mode-ui="enabled: false">
+    
+    <a-assets>
+        <video id="lftVid" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
+    </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity id="target" mindar-image-target="targetIndex: 0">
-            <!-- OBJEYİ BİRAZ ÖNE ALARAK (0.1) KARTIN İÇİNDE KAYBOLMASINI ENGELLİYORUZ -->
-            <a-video src="#lftVid" width="1.2" height="0.67" position="0 0 0.1" material="shader: flat; side: double;"></a-video>
-        </a-entity>
-    </a-scene>
+    <a-entity id="target" mindar-image-target="targetIndex: 0">
+        <!-- Boyutları 1.8 ve 1.01 yaparak büyüttük, sarsıntı için derinliği 0.1 yaptık -->
+        <a-video src="#lftVid" width="1.8" height="1.01" position="0 0 0.1" material="shader: flat; side: double;"></a-video>
+    </a-entity>
+</a-scene>
 
     <script>
         const btn = document.getElementById('btn');
