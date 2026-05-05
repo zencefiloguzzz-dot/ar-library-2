@@ -27,23 +27,24 @@
         <button id="btn">BAŞLAT</button>
     </div>
 
-    <a-scene 
-        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes;" 
-        embedded color-space="sRGB" 
-        renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false">
-        
-        <a-assets>
-            <!-- lft.mp4 dosyasını burada tanımlıyoruz -->
-            <video id="vid" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
-        </a-assets>
+   <!-- Sahne kısmını bu değerlerle güncelle -->
+<a-scene 
+    mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001;" 
+    embedded color-space="sRGB" 
+    renderer="colorManagement: true, physicallyCorrectLights" 
+    vr-mode-ui="enabled: false">
+    
+    <a-assets>
+        <video id="vid" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
+    </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity id="target" mindar-image-target="targetIndex: 0">
-            <a-video src="#vid" width="1.5" height="0.85" position="0 0 0" material="shader: flat;"></a-video>
-        </a-entity>
-    </a-scene>
+    <a-entity id="target" mindar-image-target="targetIndex: 0">
+        <!-- Genişliği biraz artırdım ki daha rahat görünsün -->
+        <a-video src="#vid" width="2" height="1.12" position="0 0 0" material="shader: flat;"></a-video>
+    </a-entity>
+</a-scene>
 
     <script>
         const btn = document.getElementById('btn');
