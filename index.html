@@ -2,68 +2,96 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>The Phrasal-Filmer AR Library</title>
+    <!-- Mind-AR ve A-Frame Kütüphaneleri -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; overflow: hidden; font-family: sans-serif; }
         #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000;
+            background: rgba(0,0,0,0.8); z-index: 1000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: white; font-family: sans-serif;
+            color: white; text-align: center;
         }
-        #btn { padding: 15px 35px; font-size: 20px; background: #e67e22; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        #start-btn {
+            padding: 15px 30px; font-size: 20px; background: #2196F3;
+            color: white; border: none; border-radius: 10px; cursor: pointer;
+            margin-top: 20px; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+        #hud {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.6); color: white; padding: 10px 20px;
+            border-radius: 20px; z-index: 999; display: none; font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Başlangıç Ekranı (Android Ses Kilidini Açmak İçin Şart) -->
     <div id="overlay">
-        <h2>"Look Forward To" AR</h2>
-        <p>Görüntü gelmiyorsa butona tıklayıp kameraya izin verin.</p>
-        <button id="btn">DENEYİMİ BAŞLAT</button>
+        <h2>The Phrasal-Filmer</h2>
+        <p>Deneyimi başlatmak için butona tıklayın <br> ve kameraya izin verin.</p>
+        <button id="start-btn">AR DENEYİMİNİ BAŞLAT</button>
     </div>
 
+    <!-- Bilgi Paneli -->
+    <div id="hud">Kamerayı Kartın Üzerine Tutun</div>
+
     <a-scene 
-        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes;" 
-        embedded color-space="sRGB" 
+        mindar-image="imageTargetSrc: cuw.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.01;" 
+        color-space="sRGB" 
         renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false">
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
         
         <a-assets>
-            <video id="vid" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
+            <!-- Video dosyası: playsinline ve muted Android için kritiktir -->
+            <video id="ar-video" src="cuw.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline muted></video>
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity id="target" mindar-image-target="targetIndex: 0">
-            <!-- shader: flat ve material: transparent: false görüntünün gelmesini zorlar -->
-            <a-video src="#vid" width="1" height="0.56" position="0 0 0.1" material="shader: flat; side: double;"></a-video>
+        <!-- Hedef Bulunduğunda Görünecek Video -->
+        <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
+            <!-- shader: flat siyah ekran sorununu çözer -->
+            <a-video src="#ar-video" width="3.5" height="1.96" position="0 0 0" material="shader: flat; color: #FFF;"></a-video>
         </a-entity>
     </a-scene>
 
     <script>
-        const btn = document.getElementById('btn');
-        const video = document.getElementById('vid');
-        const scene = document.querySelector('a-scene');
+        const startBtn = document.getElementById('start-btn');
+        const overlay = document.getElementById('overlay');
+        const hud = document.getElementById('hud');
+        const video = document.getElementById('ar-video');
+        const sceneEl = document.querySelector('a-scene');
+        const targetEl = document.querySelector('#target-anchor');
 
-        btn.addEventListener('click', () => {
-            // Tarayıcıya videoyu "hazırlamasını" söylüyoruz
-            video.load(); 
+        startBtn.addEventListener('click', () => {
+            // 1. ADIM: Android Ses Kilidini Aç
             video.play().then(() => {
-                video.pause();
+                video.pause(); 
                 video.currentTime = 0;
-            });
-            scene.systems["mindar-image-system"].start();
-            document.getElementById('overlay').style.display = 'none';
+                video.muted = false; // Kullanıcı tıkladığı için ses artık serbest
+            }).catch(e => console.log("Ses açılamadı, sessiz devam:", e));
+
+            // 2. ADIM: AR Sistemini Başlat
+            sceneEl.systems["mindar-image-system"].start();
+            
+            overlay.style.display = 'none';
+            hud.style.display = 'block';
         });
 
-        const target = document.querySelector('#target');
-        target.addEventListener("targetFound", () => {
-            video.muted = false; // Sesi aktif et
-            video.play().catch(e => console.log("Oynatma hatası:", e));
+        // Hedef Algılama
+        targetEl.addEventListener("targetFound", event => {
+            hud.textContent = "Video Oynatılıyor... ✓";
+            video.muted = false; // Sesi garantiye al
+            video.play();
         });
 
-        target.addEventListener("targetLost", () => {
+        targetEl.addEventListener("targetLost", event => {
+            hud.textContent = "Kamerayı Kartın Üzerine Tutun";
             video.pause();
         });
     </script>
