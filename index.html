@@ -25,7 +25,7 @@ HTML
 
    <!-- Sahne içindeki ilgili satırları bunlarla değiştirmen yeterli -->
 <a-scene 
-    mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 10;" 
+    mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.1; filterBeta: 1000;" 
     embedded color-space="sRGB" 
     renderer="colorManagement: true, physicallyCorrectLights" 
     vr-mode-ui="enabled: false">
@@ -37,9 +37,8 @@ HTML
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <a-entity id="target" mindar-image-target="targetIndex: 0">
-        <!-- Boyutlar %50 artırıldı (1.8'den 2.7'ye çıktı) -->
-        <!-- Sarsıntıyı kesmek için derinlik payı (0.12) artırıldı -->
-        <a-video src="#lftVid" width="2.7" height="1.52" position="0 0 0.12" material="shader: flat; side: double;"></a-video>
+        <!-- Boyut korundu (2.7), derinlik (z-axis) sarsıntı payı için 0.15 yapıldı -->
+        <a-video src="#lftVid" width="2.7" height="1.52" position="0 0 0.15" material="shader: flat; side: double;"></a-video>
     </a-entity>
 </a-scene>
 
