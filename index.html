@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>The Phrasal-Filmer AR - Look Forward To</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9); z-index: 1000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: white; text-align: center; padding: 20px;
+        }
+        #start-btn {
+            padding: 18px 36px; font-size: 18px; font-weight: bold; background: #e74c3c;
+            color: white; border: none; border-radius: 50px; cursor: pointer;
+            margin-top: 25px; box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+            transition: transform 0.2s;
+        }
+        #start-btn:active { transform: scale(0.95); }
+        #hud {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9); color: #333; padding: 12px 24px;
+            border-radius: 30px; z-index: 999; display: none; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <h1 style="margin-bottom: 10px;">"Look Forward To"</h1>
+        <p>AR Deneyimini başlatmak için butona tıklayın<br>ve kamerayı hedef görsele tutun.</p>
+        <button id="start-btn">DENEYİMİ BAŞLAT</button>
+    </div>
+
+    <div id="hud">Hedef Görseli Tarayın...</div>
+
+    <a-scene 
+        mindar-image="imageTargetSrc: lookforwardto.mind; autoStart: false; uiScanning: yes;" 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
+        
+        <a-assets>
+            <!-- Dosya ismini lookforwardto.mp4 olarak güncelledim -->
+            <video id="ar-video" src="lookforwardto.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline muted></video>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity id="target-anchor" mindar-image-target="targetIndex: 0">
+            <!-- 16:9 formatına uygun genişlik ve yükseklik -->
+            <a-video src="#ar-video" width="3.5" height="1.96" position="0 0 0" material="shader: flat; color: #FFF;"></a-video>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const overlay = document.getElementById('overlay');
+        const hud = document.getElementById('hud');
+        const video = document.getElementById('ar-video');
+        const sceneEl = document.querySelector('a-scene');
+        const targetEl = document.querySelector('#target-anchor');
+
+        startBtn.addEventListener('click', () => {
+            // Android ve tarayıcı kısıtlamalarını aşmak için etkileşim anında videoyu tetikle
+            video.play().then(() => {
+                video.pause(); 
+                video.currentTime = 0;
+                video.muted = false; 
+            });
+
+            sceneEl.systems["mindar-image-system"].start();
+            overlay.style.display = 'none';
+            hud.style.display = 'block';
+        });
+
+        targetEl.addEventListener("targetFound", event => {
+            hud.textContent = "Oynatılıyor: Look Forward To ✓";
+            hud.style.background = "#2ecc71";
+            hud.style.color = "white";
+            video.play();
+        });
+
+        targetEl.addEventListener("targetLost", event => {
+            hud.textContent = "Hedef Görseli Tarayın...";
+            hud.style.background = "rgba(255, 255, 255, 0.9)";
+            hud.style.color = "#333";
+            video.pause();
+        });
+    </script>
+</body>
+</html>
