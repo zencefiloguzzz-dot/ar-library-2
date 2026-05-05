@@ -2,49 +2,44 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Phrasal-Filmer LFT</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-    
     <style>
         body { margin: 0; overflow: hidden; }
         #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 1000;
+            background: rgba(0,0,0,0.8); z-index: 1000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             color: white; font-family: sans-serif;
         }
-        #btn {
-            padding: 20px 40px; font-size: 22px; background: #27ae60;
-            color: white; border: none; border-radius: 50px; cursor: pointer;
-        }
+        #btn { padding: 15px 30px; font-size: 20px; background: #e74c3c; color: white; border: none; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <h2>Phrasal-Filmer: LFT</h2>
+        <h2>"Look Forward To" AR</h2>
         <button id="btn">BAŞLAT</button>
     </div>
 
-   <!-- Sahne kısmını bu değerlerle güncelle -->
-<a-scene 
-    mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001;" 
-    embedded color-space="sRGB" 
-    renderer="colorManagement: true, physicallyCorrectLights" 
-    vr-mode-ui="enabled: false">
-    
-    <a-assets>
-        <video id="vid" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
-    </a-assets>
+    <a-scene 
+        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001;" 
+        embedded color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false">
+        
+        <a-assets>
+            <video id="vid" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
+        </a-assets>
 
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <a-entity id="target" mindar-image-target="targetIndex: 0">
-        <!-- Genişliği biraz artırdım ki daha rahat görünsün -->
-        <a-video src="#vid" width="2" height="1.12" position="0 0 0" material="shader: flat;"></a-video>
-    </a-entity>
-</a-scene>
+        <a-entity id="target" mindar-image-target="targetIndex: 0">
+            <!-- Görüntü yoksa shader: flat ve side: double eklemek çözümdür -->
+            <!-- Genişlik (width) ve Yükseklik (height) videona göre 16:9 oranında ayarlandı -->
+            <a-video src="#vid" width="1" height="0.56" position="0 0 0.1" rotation="0 0 0" material="shader: flat; side: double;"></a-video>
+        </a-entity>
+    </a-scene>
 
     <script>
         const btn = document.getElementById('btn');
@@ -53,12 +48,11 @@
         const scene = document.querySelector('a-scene');
 
         btn.addEventListener('click', () => {
-            // Android/iOS ses ve oynatma kilidini manuel tetikleme ile açıyoruz
+            // Ses ve görüntü kilidini aç
             video.play().then(() => {
                 video.pause();
                 video.currentTime = 0;
             });
-            
             scene.systems["mindar-image-system"].start();
             overlay.style.display = 'none';
         });
