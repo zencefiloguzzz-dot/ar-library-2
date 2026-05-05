@@ -8,22 +8,23 @@
         body { margin: 0; overflow: hidden; }
         #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 1000;
+            background: rgba(0,0,0,0.9); z-index: 1000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             color: white; font-family: sans-serif;
         }
-        #btn { padding: 15px 30px; font-size: 20px; background: #3498db; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        #btn { padding: 15px 35px; font-size: 22px; background: #2ecc71; color: white; border: none; border-radius: 50px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <h3>"Look Forward To" AR Library</h3>
-        <button id="btn">DENEYİMİ BAŞLAT</button>
+        <h2>Phrasal-Filmer AR Denetimi</h2>
+        <p>Görüntü gelmiyorsa lütfen butona tekrar basın.</p>
+        <button id="btn">BAŞLAT VE DÜZELT</button>
     </div>
 
     <a-scene 
-        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes;" 
+        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001;" 
         embedded color-space="sRGB" 
         renderer="colorManagement: true, physicallyCorrectLights" 
         vr-mode-ui="enabled: false">
@@ -35,31 +36,38 @@
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity id="target" mindar-image-target="targetIndex: 0">
-            <!-- a-plane kullanarak videoyu bir yüzeye giydiriyoruz, bu yarım görünme sorununu çözer -->
-            <a-plane id="video-panel" material="src: #lftVideo; shader: flat; side: double;" 
-                     width="1" height="0.56" position="0 0 0.05"></a-plane>
+            <!-- side: double ve shader: flat görüntü gelmemesini engeller -->
+            <a-video src="#lftVideo" width="1" height="0.56" position="0 0 0.2" material="shader: flat; side: double; transparent: true; opacity: 1;"></a-video>
         </a-entity>
     </a-scene>
 
     <script>
         const btn = document.getElementById('btn');
-        const overlay = document.getElementById('overlay');
         const video = document.getElementById('lftVideo');
         const scene = document.querySelector('a-scene');
 
         btn.addEventListener('click', () => {
-            // Video objesini tarayıcıya tanıt ve oynatılabilir hale getir
+            // Tarayıcıya videoyu oynatması için "el sıkışma" gönderiyoruz
             video.play().then(() => {
                 video.pause();
                 video.currentTime = 0;
             });
             scene.systems["mindar-image-system"].start();
-            overlay.style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
         });
 
+        // TETİKLEME KONTROLÜ
         const target = document.querySelector('#target');
-        target.addEventListener("targetFound", () => { video.play(); });
-        target.addEventListener("targetLost", () => { video.pause(); });
+        
+        target.addEventListener("targetFound", () => {
+            console.log("Hedef bulundu!"); // Konsola bilgi gönderir
+            video.muted = false; // Sesi aç
+            video.play();
+        });
+
+        target.addEventListener("targetLost", () => {
+            video.pause();
+        });
     </script>
 </body>
 </html>
