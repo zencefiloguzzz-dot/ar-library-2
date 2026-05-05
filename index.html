@@ -12,43 +12,43 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             color: white; font-family: sans-serif;
         }
-        #btn { padding: 15px 30px; font-size: 20px; background: #e74c3c; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        #btn { padding: 15px 30px; font-size: 20px; background: #3498db; color: white; border: none; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <h2>"Look Forward To" AR</h2>
-        <button id="btn">BAŞLAT</button>
+        <h3>"Look Forward To" AR Library</h3>
+        <button id="btn">DENEYİMİ BAŞLAT</button>
     </div>
 
     <a-scene 
-        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001;" 
+        mindar-image="imageTargetSrc: lft.mind; autoStart: false; uiScanning: yes;" 
         embedded color-space="sRGB" 
         renderer="colorManagement: true, physicallyCorrectLights" 
         vr-mode-ui="enabled: false">
         
         <a-assets>
-            <video id="vid" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
+            <video id="lftVideo" src="lft.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity id="target" mindar-image-target="targetIndex: 0">
-            <!-- Görüntü yoksa shader: flat ve side: double eklemek çözümdür -->
-            <!-- Genişlik (width) ve Yükseklik (height) videona göre 16:9 oranında ayarlandı -->
-            <a-video src="#vid" width="1" height="0.56" position="0 0 0.1" rotation="0 0 0" material="shader: flat; side: double;"></a-video>
+            <!-- a-plane kullanarak videoyu bir yüzeye giydiriyoruz, bu yarım görünme sorununu çözer -->
+            <a-plane id="video-panel" material="src: #lftVideo; shader: flat; side: double;" 
+                     width="1" height="0.56" position="0 0 0.05"></a-plane>
         </a-entity>
     </a-scene>
 
     <script>
         const btn = document.getElementById('btn');
         const overlay = document.getElementById('overlay');
-        const video = document.getElementById('vid');
+        const video = document.getElementById('lftVideo');
         const scene = document.querySelector('a-scene');
 
         btn.addEventListener('click', () => {
-            // Ses ve görüntü kilidini aç
+            // Video objesini tarayıcıya tanıt ve oynatılabilir hale getir
             video.play().then(() => {
                 video.pause();
                 video.currentTime = 0;
@@ -57,13 +57,9 @@
             overlay.style.display = 'none';
         });
 
-        document.querySelector('#target').addEventListener("targetFound", () => {
-            video.play();
-        });
-
-        document.querySelector('#target').addEventListener("targetLost", () => {
-            video.pause();
-        });
+        const target = document.querySelector('#target');
+        target.addEventListener("targetFound", () => { video.play(); });
+        target.addEventListener("targetLost", () => { video.pause(); });
     </script>
 </body>
 </html>
